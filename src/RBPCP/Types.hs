@@ -21,8 +21,8 @@ import           Data.Function ((&))
 
 
 type Vout  = Word32
-type Hours = Word32
-type BtcConf = Word32
+type Hours = Word
+type BtcConf = Word
 
 
 data ChannelStatus = ChannelOpen | ChannelClosed deriving (Show, Eq)
