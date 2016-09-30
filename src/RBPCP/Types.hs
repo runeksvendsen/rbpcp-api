@@ -1,10 +1,10 @@
 {-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
 
-module API.RBPCP.Types where
+module RBPCP.Types where
 
-import           Internal.Types
-import           Internal.Util
-import           Internal.Orphans ()
+import           RBPCP.Internal.Types
+import           RBPCP.Internal.Util
+import           RBPCP.Internal.Orphans ()
 import           Data.Bitcoin.PaymentChannel.Types
 import           Data.Aeson
 import           Data.Word                          (Word32)

@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-module API.Internal.Callback.Types where
+module RBPCP.Callback.Types where
 
 import qualified Data.ByteString as BS
 import           GHC.Generics

@@ -13,15 +13,20 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
 
-  exposed-modules:     API
-                       API.RBPCP.RBPCP
-                       API.RBPCP.Types
-                       API.Internal.Callback.AppData
-                       API.Internal.Callback.Types
+  exposed-modules:
+                       -- Client-facing payment API
+                       RBPCP
+                       RBPCP.Types
+                       RBPCP.Api
 
-  other-modules:       Internal.Orphans
-                       Internal.Types
-                       Internal.Util
+                       -- Content server-facing internal API
+                       RBPCP.Callback
+                       RBPCP.Callback.Types
+                       RBPCP.Callback.Api
+
+  other-modules:       RBPCP.Internal.Orphans
+                       RBPCP.Internal.Types
+                       RBPCP.Internal.Util
 
   build-depends:       base >= 4.7 && < 5
                      , bytestring

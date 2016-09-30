@@ -1,9 +1,9 @@
 {-# LANGUAGE DataKinds, LambdaCase, TypeOperators, OverloadedStrings, FlexibleInstances, MultiParamTypeClasses #-}
 
-module API.RBPCP.RBPCP where
+module RBPCP.Api where
 
-import           Internal.Types
-import           API.RBPCP.Types
+import           RBPCP.Types
+import           RBPCP.Internal.Types
 import           Data.Bitcoin.PaymentChannel.Types (BitcoinLockTime, FullPayment, SendPubKey)
 import           Servant.API
 import           Data.Word (Word32)

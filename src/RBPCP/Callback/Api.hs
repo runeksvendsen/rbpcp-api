@@ -1,8 +1,8 @@
 {-# LANGUAGE DataKinds, LambdaCase, TypeOperators, OverloadedStrings, FlexibleInstances, MultiParamTypeClasses #-}
 
-module API.Internal.Callback.AppData where
+module RBPCP.Callback.Api where
 
-import           API.Internal.Callback.Types
+import           RBPCP.Callback.Types
 import           Servant.API
 
 

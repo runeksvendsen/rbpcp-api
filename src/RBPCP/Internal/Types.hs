@@ -1,4 +1,4 @@
-module Internal.Types
+module RBPCP.Internal.Types
 (
     module Network.Haskoin.Transaction
   , module Network.Haskoin.Crypto

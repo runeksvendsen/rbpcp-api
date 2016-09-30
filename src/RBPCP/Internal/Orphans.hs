@@ -1,7 +1,7 @@
-module Internal.Orphans where
+module RBPCP.Internal.Orphans where
 
-import Internal.Types
-import Internal.Util
+import RBPCP.Internal.Types
+import RBPCP.Internal.Util
 
 import Data.Aeson (Value(..), FromJSON(..), ToJSON(..), withText, genericToJSON, genericParseJSON)
 

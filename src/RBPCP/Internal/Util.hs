@@ -1,4 +1,4 @@
-module Internal.Util
+module RBPCP.Internal.Util
 (
     cs
   , (<>)
