@@ -1,24 +1,39 @@
 name:                haskell-rbpcp-api
 version:             0.1.0.0
-synopsis:            Initial project template from stack
-description:         Please see README.md
+synopsis:            Servant API description of RESTful Bitcoin Payment Channel Protocol
 homepage:            https://github.com/runeksvendsen/haskell-rbpcp-api#readme
-license:             BSD3
-license-file:        LICENSE
+license:             PublicDomain
 author:              Rune K. Svendsen
 maintainer:          runesvend@gmail.com
-copyright:           2016 Rune K. Svendsen
 category:            Finance Network Bitcoin
 build-type:          Simple
--- extra-source-files:
 cabal-version:       >=1.10
+
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Api
+
+  exposed-modules:     API
+                       API.RBPCP.RBPCP
+                       API.RBPCP.Types
+                       API.Internal.Callback.AppData
+                       API.Internal.Callback.Types
+
+  other-modules:       Internal.Orphans
+                       Internal.Types
+                       Internal.Util
+
   build-depends:       base >= 4.7 && < 5
+                     , bytestring
+                     , base16-bytestring
+                     , text
                      , aeson
+                     , cereal
                      , servant
+                     , bitcoin-payment-channel
+                     , haskoin-core == 0.4.0
+                     , string-conversions
+
   default-language:    Haskell2010
 
 source-repository head
