@@ -5,7 +5,6 @@ module RBPCP.Types where
 import           RBPCP.Internal.Types
 import           RBPCP.Internal.Util
 import           RBPCP.Internal.Orphans ()
-import           Data.Bitcoin.PaymentChannel.Types
 import           Data.Aeson
 import           Data.Word                          (Word32)
 

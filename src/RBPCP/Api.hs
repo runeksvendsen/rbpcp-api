@@ -4,7 +4,6 @@ module RBPCP.Api where
 
 import           RBPCP.Types
 import           RBPCP.Internal.Types
-import           Data.Bitcoin.PaymentChannel.Types (BitcoinLockTime, FullPayment, SendPubKey)
 import           Servant.API
 
 

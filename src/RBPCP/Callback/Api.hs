@@ -10,7 +10,7 @@ import           Servant.API
 --  and receive information about all incoming payments.
 --  The response delivered to this request can contain arbitrary application data,
 --  which will be included in the PaymentResult response delivered to the paying client.
-type AppDataCallback =
-    "get_appdata" :> ReqBody '[JSON] PaymentInfo :> Post '[JSON] ApplicationData
+type PaymentCallback =
+    "value_received" :> ReqBody '[JSON] PaymentInfo :> Post '[JSON] PaymentResponse
 
 
