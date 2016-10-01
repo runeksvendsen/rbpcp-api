@@ -6,6 +6,7 @@ import           RBPCP.Internal.Types
 import           RBPCP.Internal.Util
 import           RBPCP.Internal.Orphans ()
 import           Data.Aeson
+import qualified Data.Serialize as Bin
 import           Data.Word                          (Word32)
 
 -- Generated
@@ -34,7 +35,13 @@ instance FromJSON ChannelStatus where
 instance ToJSON ChannelStatus where
   toJSON ChannelOpen = String "open"
   toJSON ChannelClosed = String "closed"
-
+instance Bin.Serialize ChannelStatus where
+    put ChannelOpen = Bin.putWord8 0x01
+    put ChannelClosed = Bin.putWord8 0x02
+    get = Bin.getWord8 >>= \w -> case w of
+            0x01 -> return ChannelOpen
+            0x02 -> return ChannelClosed
+            n    -> fail $ "expected 1 or 2, not: " ++ show n
 
 
 -- Generated code with types modified:
