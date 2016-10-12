@@ -11,4 +11,4 @@ where
 import Network.Haskoin.Transaction
 import Network.Haskoin.Crypto
 import Network.Haskoin.Script
-import Data.Bitcoin.PaymentChannel.Types
+import Data.Bitcoin.PaymentChannel.Types hiding (Payment)

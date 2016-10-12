@@ -2,7 +2,7 @@
 
 module RBPCP.Types where
 
-import           RBPCP.Internal.Types
+import           RBPCP.Internal.Types hiding (Payment)
 import           RBPCP.Internal.Util
 import           RBPCP.Internal.Orphans ()
 import           Data.Aeson
@@ -68,6 +68,18 @@ data FundingInfo = FundingInfo
 
 
 -- Just generated code
+
+-- | A wrapper that contains both payment data and application data
+data Payment = Payment
+    { paymentPaymentData :: FullPayment -- ^ Payment data
+    , paymentApplicationData :: Text -- ^ Optional application data (may be an empty string). The client may wish to include data with the payment, for example an order reference, or any other data which will be used by the server to deliver the appropriate application data in the **PaymentResult** response.
+    } deriving (Show, Eq, Generic)
+
+instance FromJSON Payment where
+  parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "payment")
+instance ToJSON Payment where
+  toJSON     = genericToJSON     (removeFieldLabelPrefix False "payment")
+
 -- |
 data ChannelLocation = ChannelLocation
     { channelInfo_channel_uri :: Text -- ^ The URL of the resource which must the POSTed to in order to open a new payment channel, after which further payments can be PUT on this resource. Close the payment channel by issuing a DELETE request on the resource.
