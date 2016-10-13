@@ -43,6 +43,25 @@ instance Bin.Serialize ChannelStatus where
             0x02 -> return ChannelClosed
             n    -> fail $ "expected 1 or 2, not: " ++ show n
 
+data ErrorType = PaymentError | ApplicationError deriving (Show, Eq)
+instance FromJSON ErrorType where
+    parseJSON = withText "ErrorType" $
+            \s -> case s of
+                "payment_error"   -> return PaymentError
+                "application_error" -> return ApplicationError
+                e        -> fail $ "expected \"payment_error\"" ++
+                                   " or \"application_error\", not: " ++ show (cs e :: String)
+instance ToJSON ErrorType where
+  toJSON PaymentError = String "payment_error"
+  toJSON ApplicationError = String "application_error"
+instance Bin.Serialize ErrorType where
+    put PaymentError = Bin.putWord8 0x01
+    put ApplicationError = Bin.putWord8 0x02
+    get = Bin.getWord8 >>= \w -> case w of
+            0x01 -> return PaymentError
+            0x02 -> return ApplicationError
+            n    -> fail $ "expected 0x01 or 0x02, not: " ++ show n
+
 
 -- Generated code with types modified:
 -- |
@@ -66,6 +85,11 @@ data FundingInfo = FundingInfo
     , fundingInfoMin_duration_hours        :: Hours
     } deriving (Show, Eq, Generic)
 
+-- | Error response type
+data Error = Error
+    { errorType     :: ErrorType    -- ^ Either 'payment_error', in case of an invalid payment, or 'application_error', in case of application-related errors (invalid 'application_data' in the supplied **Payment**)
+    , errorMessage  :: Text         -- ^ Human-readable error message
+    } deriving (Show, Eq, Generic)
 
 -- Just generated code
 
@@ -84,6 +108,11 @@ instance ToJSON Payment where
 data ChannelLocation = ChannelLocation
     { channelInfo_channel_uri :: Text -- ^ The URL of the resource which must the POSTed to in order to open a new payment channel, after which further payments can be PUT on this resource. Close the payment channel by issuing a DELETE request on the resource.
     } deriving (Show, Eq, Generic)
+
+instance FromJSON Error where
+  parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "error")
+instance ToJSON Error where
+  toJSON     = genericToJSON     (removeFieldLabelPrefix False "error")
 
 instance FromJSON FundingInfo where
   parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "fundingInfo")
