@@ -1,24 +1,21 @@
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric, DeriveAnyClass #-}
 module RBPCP.Callback.Types where
 
 import           RBPCP.Internal.Types
 import qualified Data.Text as T
-import qualified Data.Aeson as JSON
+import           Data.Aeson (FromJSON, ToJSON)
 import           GHC.Generics
 
-data PaymentInfo = PaymentInfo
+
+data CallbackInfo = CallbackInfo
   { amount              :: BitcoinAmount
   , chan_value_left     :: BitcoinAmount
   , chan_total_value    :: BitcoinAmount
   , client_app_data     :: T.Text
   , full_payment        :: FullPayment
-  } deriving Generic
+  } deriving (Generic, FromJSON, ToJSON)
 
-data PaymentResponse = PaymentResponse
+data CallbackResponse = CallbackResponse
   { resp_app_data       :: T.Text
-  } deriving Generic
-
-instance JSON.FromJSON PaymentInfo
-instance JSON.ToJSON   PaymentInfo
-instance JSON.FromJSON PaymentResponse
-instance JSON.ToJSON   PaymentResponse
+  , resp_app_error      :: Maybe T.Text
+  } deriving (Generic, FromJSON, ToJSON)

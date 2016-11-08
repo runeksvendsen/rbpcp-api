@@ -11,6 +11,6 @@ import           Servant.API
 --  The response delivered to this request can contain arbitrary application data,
 --  which will be included in the PaymentResult response delivered to the paying client.
 type PaymentCallback =
-    "value_received" :> ReqBody '[JSON] PaymentInfo :> Post '[JSON] PaymentResponse
+    "value_received" :> ReqBody '[JSON] CallbackInfo :> Post '[JSON] CallbackResponse
 
 
