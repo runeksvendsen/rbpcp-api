@@ -8,13 +8,14 @@ import           GHC.Generics
 
 data PaymentInfo = PaymentInfo
   { amount              :: BitcoinAmount
-  , sender              :: SendPubKey
   , chan_value_left     :: BitcoinAmount
   , chan_total_value    :: BitcoinAmount
+  , client_app_data     :: T.Text
+  , full_payment        :: FullPayment
   } deriving Generic
 
 data PaymentResponse = PaymentResponse
-  { app_data    :: T.Text
+  { resp_app_data       :: T.Text
   } deriving Generic
 
 instance JSON.FromJSON PaymentInfo

@@ -28,6 +28,11 @@ type RBPCP =
   :<|> ChanClose
 
 
+type CoolAPI =
+    "coolAPI" :> RBPCP
+    :<|> ChanClose
+    :<|> ChanClose
+
 
 -- Short-hands
 type BLT = BitcoinLockTime
