@@ -95,7 +95,7 @@ data Error = Error
 
 -- | A wrapper that contains both payment data and application data
 data Payment = Payment
-    { paymentPaymentData :: FullPayment -- ^ Payment data
+    { paymentPaymentData :: FullPayment -- ^ Actual payment
     , paymentApplicationData :: Text -- ^ Optional application data (may be an empty string). The client may wish to include data with the payment, for example an order reference, or any other data which will be used by the server to deliver the appropriate application data in the **PaymentResult** response.
     } deriving (Show, Eq, Generic)
 
