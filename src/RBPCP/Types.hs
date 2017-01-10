@@ -97,13 +97,13 @@ data Error = Error
 
 -- | A payment comprises a signature over a Bitcoin transaction with a decremented client change value. The Bitcoin transaction redeems the outpoint specified by &#39;funding_txid&#39; and &#39;funding_vout&#39; (a P2SH output governed by &#39;redeem_script&#39;), and pays &#39;change_value&#39; to &#39;change_address&#39;.
 data PaymentData = PaymentData
-    { paymentDataRedeemScript   :: JsonHex Script     -- ^ The funds sent to the funding address are bound by this contract (Bitcoin script). The data is needed to construct the payment signature. Hex-encoded data.
+    { paymentDataRedeemScript   :: JsonHex Script       -- ^ The funds sent to the funding address are bound by this contract (Bitcoin script). The data is needed to construct the payment signature. Hex-encoded data.
     , paymentDataFundingTxid    :: TxHash               -- ^ The transaction ID of the Bitcoin transaction paying to the channel funding address.
     , paymentDataFundingVout    :: Vout                 -- ^ The output index/\"vout\" of the output (in the transaction) payingto the channel funding address.
-    , paymentDataSignatureData  :: JsonHex Signature     -- ^ DER-encoded ECDSA signature (in hex). This is a SIGHASH_SINGLE|ANYONECANPAY signature over the the \"payment transaction\", which is a Bitcoin transaction that: redeems the outpoint specified by 'funding_txid' and 'funding_vout' using the redeem script defined in 'redeem_script', with an output which sends 'change_value' to 'change_address'.
+    , paymentDataSignatureData  :: JsonHex Signature    -- ^ DER-encoded ECDSA signature (in hex). This is a SIGHASH_SINGLE|ANYONECANPAY signature over the the \"payment transaction\", which is a Bitcoin transaction that: redeems the outpoint specified by 'funding_txid' and 'funding_vout' using the redeem script defined in 'redeem_script', with an output which sends 'change_value' to 'change_address'.
     , paymentDataChangeValue    :: Word64               -- ^ The value sent back to the client in the payment transaction. The total amount transferred to the server is this amount subtracted from the value sent to the channel funding address.
-    , paymentDataChangeAddress  :: Text                 -- ^ The client change address as used in the only output of the payment transaction.
-    , paymentDataSighashFlag    :: JsonHex Word8          -- ^ Specifies which parts of the payment Bitcoin transaction are signed. Hex-encoded, single byte; in both v1 and v2 always equal to \"83\" (0x83), which is **SIGHASH_SINGLE|ANYONECANPAY**, meaning the client only signs its own output, and also allowing more to be added.
+    , paymentDataChangeAddress  :: Address              -- ^ The client change address as used in the only output of the payment transaction.
+    , paymentDataSighashFlag    :: JsonHex Word8        -- ^ Specifies which parts of the payment Bitcoin transaction are signed. Hex-encoded, single byte; in both v1 and v2 always equal to \"83\" (0x83), which is **SIGHASH_SINGLE|ANYONECANPAY**, meaning the client only signs its own output, and also allowing more to be added.
     } deriving (Show, Eq, Generic)
 
 instance FromJSON PaymentData where
