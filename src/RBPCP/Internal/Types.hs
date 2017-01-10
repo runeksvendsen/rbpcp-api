@@ -25,9 +25,9 @@ import qualified Data.Serialize as Bin
 
 type PubKey = PubKeyC
 
-data JsonHex a = JsonHex { asHex :: a } deriving (Eq, Show, Generic, Bin.Serialize)
+data JsonHex a = JsonHex { fromHex :: a } deriving (Eq, Show, Generic, Bin.Serialize)
 instance (Eq a, Show a, Bin.Serialize a) => ToJSON (JsonHex a) where
-    toJSON = String . cs . hexEncode . asHex
+    toJSON = String . cs . hexEncode . fromHex
 instance (Eq a, Show a, Bin.Serialize a) => FromJSON (JsonHex a) where
     parseJSON = withText "JsonHex a" $
         either (fail . (++ "Hex decode fail: ")) return .

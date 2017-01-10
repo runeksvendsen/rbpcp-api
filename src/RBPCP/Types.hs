@@ -103,7 +103,7 @@ data PaymentData = PaymentData
     , paymentDataSignatureData  :: JsonHex Signature    -- ^ DER-encoded ECDSA signature (in hex). This is a SIGHASH_SINGLE|ANYONECANPAY signature over the the \"payment transaction\", which is a Bitcoin transaction that: redeems the outpoint specified by 'funding_txid' and 'funding_vout' using the redeem script defined in 'redeem_script', with an output which sends 'change_value' to 'change_address'.
     , paymentDataChangeValue    :: Word64               -- ^ The value sent back to the client in the payment transaction. The total amount transferred to the server is this amount subtracted from the value sent to the channel funding address.
     , paymentDataChangeAddress  :: Address              -- ^ The client change address as used in the only output of the payment transaction.
-    , paymentDataSighashFlag    :: JsonHex Word8        -- ^ Specifies which parts of the payment Bitcoin transaction are signed. Hex-encoded, single byte; in both v1 and v2 always equal to \"83\" (0x83), which is **SIGHASH_SINGLE|ANYONECANPAY**, meaning the client only signs its own output, and also allowing more to be added.
+    , paymentDataSighashFlag    :: JsonHex SigHash      -- ^ Specifies which parts of the payment Bitcoin transaction are signed. Hex-encoded, single byte; in both v1 and v2 always equal to \"83\" (0x83), which is **SIGHASH_SINGLE|ANYONECANPAY**, meaning the client only signs its own output, and also allowing more to be added.
     } deriving (Show, Eq, Generic)
 
 instance FromJSON PaymentData where
