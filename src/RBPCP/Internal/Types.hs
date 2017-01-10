@@ -25,11 +25,13 @@ import qualified Data.Serialize as Bin
 
 type PubKey = PubKeyC
 
-data AsHex a = AsHex { asHex :: a } deriving (Eq, Show)
-instance (Eq a, Show a, Bin.Serialize a) => ToJSON (AsHex a) where
+data JsonHex a = JsonHex { asHex :: a } deriving (Eq, Show, Generic, Bin.Serialize)
+instance (Eq a, Show a, Bin.Serialize a) => ToJSON (JsonHex a) where
     toJSON = String . cs . hexEncode . asHex
-instance (Eq a, Show a, Bin.Serialize a) => FromJSON (AsHex a) where
-    parseJSON = withText "AsHex a" $ either fail return . fmap AsHex . hexDecode . cs
+instance (Eq a, Show a, Bin.Serialize a) => FromJSON (JsonHex a) where
+    parseJSON = withText "JsonHex a" $
+        either (fail . (++ "Hex decode fail: ")) return .
+            fmap JsonHex . hexDecode . cs
 
 -- | Wraps any client-related datatype (eg. pubkey, signature)
 data Client a = Client a deriving (Eq, Show, Generic, Bin.Serialize, ToJSON, FromJSON)
