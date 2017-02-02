@@ -3,7 +3,6 @@ resolver: nightly-2016-12-05
 
 packages:
 ## App
-#- 'app-service-map'
 - 'rbpcp-api'
 - 'promissory-note-types'
 - 'paychan-datastore'

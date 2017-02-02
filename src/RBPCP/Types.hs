@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric, DeriveAnyClass, OverloadedStrings #-}
 
 module RBPCP.Types
 (
@@ -12,10 +12,13 @@ import           RBPCP.Internal.Util
 import           RBPCP.Internal.Orphans     ()
 import           Data.Aeson
 import           Data.Aeson.Types
+import           Data.Text.Encoding         (encodeUtf8, decodeUtf8)
 import           Data.Word                  (Word8, Word32, Word64)
 import qualified Data.Serialize             as Bin
+import qualified Data.ByteString as BS
 
--- Generated
+
+-- Generated code
 import Data.List (stripPrefix)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
@@ -66,6 +69,9 @@ instance Bin.Serialize ErrorType where
             0x02 -> return ApplicationError
             n    -> fail $ "expected 0x01 or 0x02, not: " ++ show n
 
+instance Bin.Serialize Text where
+    put = Bin.put . encodeUtf8
+    get = decodeUtf8 <$> Bin.get
 
 -- Generated code with some types modified:
 -- |
@@ -74,8 +80,8 @@ data PaymentResult = PaymentResult
     , paymentResult_channel_valueLeft :: Word64           -- ^ Remaining channel value. This is the amount that the client/sender would receive if the channel was closed now.
     , paymentResult_value_received    :: Word64     -- ^ Value of the payment that was just received. This is the additional value assigned to the receiver/server with this payment.
     , paymentResult_settlement_txid   :: Maybe TxHash     -- ^ If channel_status equals \"closed\": the transaction ID of the Bitcoin transaction which settles the channel; otherwise null.
-    , paymentResult_application_data  :: T.Text           -- ^ Optional application data
-    } deriving (Show, Eq, Generic)
+    , paymentResult_application_data  :: Text           -- ^ Optional application data
+    } deriving (Show, Eq, Generic, Bin.Serialize)
 
 -- |
 data FundingInfo = FundingInfo
@@ -87,13 +93,13 @@ data FundingInfo = FundingInfo
     , fundingInfoFunding_tx_min_conf        :: BtcConf -- ^ Minimum confirmation count that the funding transaction must have before proceeding with opening a new channel.
     , fundingInfoSettlement_period_hours    :: Hours -- ^ The server reserves the right to close the payment channel this many hours before the specified expiration date. The server hasn't received any actual value until it publishes a payment transaction to the Bitcoin network, so it needs a window of time in which the client can no longer send payments over the channel, and yet the channel refund transaction hasn't become valid.
     , fundingInfoMin_duration_hours         :: Hours -- ^ Minimum duration of newly opened channels
-    } deriving (Show, Eq, Generic)
+    } deriving (Show, Eq, Generic, Bin.Serialize)
 
 -- | Error response type
 data Error = Error
     { errorType     :: ErrorType    -- ^ Either 'payment_error', in case of an invalid payment, or 'application_error', in case of application-related errors (invalid 'application_data' in the supplied **Payment**)
     , errorMessage  :: Text         -- ^ Human-readable error message
-    } deriving (Show, Eq, Generic)
+    } deriving (Show, Eq, Generic, Bin.Serialize)
 
 -- | A payment comprises a signature over a Bitcoin transaction with a decremented client change value.
 -- The Bitcoin transaction redeems the outpoint specified by &#39;funding_txid&#39; and &#39;funding_vout&#39; (a P2SH output governed by &#39;redeem_script&#39;), and pays &#39;change_value&#39; to &#39;change_address&#39;.
@@ -105,7 +111,7 @@ data PaymentData = PaymentData
     , paymentDataChangeValue    :: Word64               -- ^ The value sent back to the client in the payment transaction. The total amount transferred to the server is this amount subtracted from the value sent to the channel funding address.
     , paymentDataChangeAddress  :: Address              -- ^ The client change address as used in the only output of the payment transaction.
     , paymentDataSighashFlag    :: JsonHex SigHash      -- ^ Specifies which parts of the payment Bitcoin transaction are signed. Hex-encoded, single byte; in both v1 and v2 always equal to \"83\" (0x83), which is **SIGHASH_SINGLE|ANYONECANPAY**, meaning the client only signs its own output, and also allowing more to be added.
-    } deriving (Show, Eq, Generic)
+    } deriving (Show, Eq, Generic, Bin.Serialize)
 
 instance FromJSON PaymentData where
   parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "paymentData")
@@ -117,17 +123,12 @@ instance ToJSON PaymentData where
 data Payment = Payment
     { paymentPaymentData        :: PaymentData  -- ^ Actual payment
     , paymentApplicationData    :: Text         -- ^ Optional application data (may be an empty string). The client may wish to include data with the payment, for example an order reference, or any other data which will be used by the server to deliver the appropriate application data in the **PaymentResult** response.
-    } deriving (Show, Eq, Generic)
+    } deriving (Show, Eq, Generic, Bin.Serialize)
 
 instance FromJSON Payment where
   parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "payment")
 instance ToJSON Payment where
   toJSON     = genericToJSON     (removeFieldLabelPrefix False "payment")
-
--- |
-data ChannelLocation = ChannelLocation
-    { channelInfo_channel_uri :: Text -- ^ The URL of the resource which must the POSTed to in order to open a new payment channel, after which further payments can be PUT on this resource. Close the payment channel by issuing a DELETE request on the resource.
-    } deriving (Show, Eq, Generic)
 
 instance FromJSON Error where
   parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "error")
@@ -154,9 +155,3 @@ removeFieldLabelPrefix forParsing prefix =
     specialChars = [("@", "'At"), ("!", "'Exclamation"), ("<=", "'Less_Than_Or_Equal_To"), ("#", "'Hash"), ("$", "'Dollar"), ("%", "'Percent"), ("&", "'Ampersand"), ("*", "'Star"), ("+", "'Plus"), ("-", "'Dash"), (".", "'Period"), (":", "'Colon"), ("|", "'Pipe"), ("<", "'LessThan"), ("!=", "'Not_Equal"), ("=", "'Equal"), ("^", "'Caret"), (">", "'GreaterThan"), ("_", "'Underscore"), (">=", "'Greater_Than_Or_Equal_To")]
     mkCharReplacement (replaceStr, searchStr) = T.unpack . replacer (T.pack searchStr) (T.pack replaceStr) . T.pack
     replacer = if forParsing then flip T.replace else T.replace
-
-instance FromJSON ChannelLocation where
-  parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "channelInfo_")
-instance ToJSON ChannelLocation where
-  toJSON     = genericToJSON     (removeFieldLabelPrefix False "channelInfo_")
-
