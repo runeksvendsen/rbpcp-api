@@ -13,6 +13,7 @@ data CallbackInfo = CallbackInfo
   , chan_value_left     :: Word64
   , chan_total_capacity :: Word64
   , full_payment        :: Payment
+  , app_data            :: T.Text
   } deriving (Generic, FromJSON, ToJSON)
 
 data CallbackResponse = CallbackResponse
