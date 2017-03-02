@@ -12,8 +12,8 @@ data CallbackInfo = CallbackInfo
   { value_received      :: Word64
   , chan_value_left     :: Word64
   , chan_total_capacity :: Word64
+  , client_pubkey       :: PubKeyC
   , full_payment        :: Payment
-  , app_data            :: T.Text
   } deriving (Generic, FromJSON, ToJSON)
 
 data CallbackResponse = CallbackResponse

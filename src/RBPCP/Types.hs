@@ -3,20 +3,26 @@
 module RBPCP.Types
 (
   module RBPCP.Types
+, PAYREQ
 , JsonHex(..)
+, BaseUrl(..)
 )
 where
 
 import           RBPCP.Internal.Types
 import           RBPCP.Internal.Util
 import           RBPCP.Internal.Orphans     ()
+import           PayProto                   (PaymentRequest, PAYREQ, PayReqSpec(..), mkPayRequestT)
 import           Data.Aeson
 import           Data.Aeson.Types
 import           Data.Text.Encoding         (encodeUtf8, decodeUtf8)
 import           Data.Word                  (Word8, Word32, Word64)
 import qualified Data.Serialize             as Bin
-import qualified Data.ByteString as BS
-
+import qualified Data.ByteString            as BS
+import qualified Data.ByteString.Lazy       as BL
+import           Servant.API                (MimeRender(..), JSON)
+import           Servant.Client             (BaseUrl(..))
+import           Data.Time.Clock
 
 -- Generated code
 import Data.List (stripPrefix)
@@ -25,11 +31,40 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import           Data.Function ((&))
 
+{-
 
+mkPayRequestT :: UTCTime -> PayReqSpec -> P.PaymentRequest
+
+-}
 
 type Vout  = Word32
 type Hours = Word
 type BtcConf = Word
+
+data FundInfoResponse = FundInfoResponse
+    { firFundInfo   :: FundingInfo
+    , firUserMemo   :: T.Text       -- ^ Memo displayed to user
+    , firNow        :: UTCTime      -- ^ Current time
+    , firPaymentURL :: BaseUrl
+    -- ^ BIP70 @Payment@ POST URL. Will receive message (containing tx paying to the funding address)
+    , firExpSecs    :: Word64
+    }
+
+instance MimeRender PAYREQ FundInfoResponse where
+    mimeRender a FundInfoResponse{..} =
+        mimeRender a $
+            mkPayRequestT firNow prs
+                where prs = PayReqSpec
+                          { prsOuts = [(fundingInfoFundingAddressCopy firFundInfo, 0)]
+                          , prsPayUrl       = firPaymentURL
+                          , prsExpSecs      = firExpSecs
+                          , prsMerchMemo    = firUserMemo
+                          , prsMerchData    = BL.toStrict $ encode firFundInfo
+                          }
+
+instance MimeRender JSON FundInfoResponse where
+    mimeRender a FundInfoResponse{..} =
+        mimeRender a firFundInfo
 
 
 data ChannelStatus = ChannelOpen | ChannelClosed deriving (Show, Eq)
