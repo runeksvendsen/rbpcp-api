@@ -6,6 +6,9 @@ module RBPCP.Types
 , PAYREQ
 , JsonHex(..)
 , BaseUrl(..)
+, Client(..)
+, Server(..)
+
 )
 where
 
