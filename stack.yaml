@@ -1,16 +1,17 @@
-# resolver: lts-6.15
+#resolver: lts-7.18
 resolver: nightly-2016-12-05
+
+# Needed for proto-lens stuff
+explicit-setup-deps:
+  promissory-note-types: true
 
 packages:
 ## App
-- 'rbpcp-api'
-- 'promissory-note-types'
-- 'paychan-datastore'
-
+- '.'
 ## Extra deps
 - location:
     git: https://github.com/runeksvendsen/haskoin.git
-    commit: ddb3adbf59aa5a21c349e5db27ee977282036868
+    commit: 9add83fd4aa8bc960a15a1d24e6e831981a9f8a4
   extra-dep: true
   subdirs:
     - haskoin-core
@@ -18,32 +19,45 @@ packages:
     - haskoin-wallet
 - location:
     git: https://github.com/runeksvendsen/bitcoin-payment-channel.git
-    commit: 23c896f977f078be1c157392740701a331674ce7
+    commit: d39ca379edb9797dea5eb9a519ccfd5812fd7ad7
   extra-dep: true
-
+- location:
+    git: https://github.com/runeksvendsen/bitcoin-payment-protocol.git
+    commit: da60b36560ba48642f0c80f2944921d2ce7ef37d
+  extra-dep: true
+- location: ## APISpec.Blockchain
+    git: https://github.com/runeksvendsen/blockchain-restful-address-index.git
+    commit: 1aca098c0a26fe4c39d9901199696c648b2987c0
+  extra-dep: true
+- location: ## Bitcoin.SPV.Wallet
+    git: https://github.com/runeksvendsen/bitcoin-spv-wallet.git
+    commit: b5f7fc333c9ea3e532e09965b859a8942928083e
+  extra-dep: true
+- location:
+    git: https://github.com/runeksvendsen/haskell-bitcoin-api.git
+    commit: d604785de5f0f31f422740029d67e22d5805fb4f
+  extra-dep: true
 - location:
     git: https://github.com/brendanhay/gogol.git
-    commit: 93f392a2df332dd699528e7ea2422dc892d00971
+    commit: 281fd577468a01238e33c5e6acfe78945129322d
   extra-dep: true
   subdirs:
     - gogol
     - core
     - gogol-datastore
-
 - location:
     git: https://github.com/tsuraan/bytestring-arbitrary.git
     commit: ce6234d7204d8f1faa3a7c05f4802ead210245ce
   extra-dep: true
 
-
-
 extra-deps:
+- wreq-0.5.0.0
 - murmur3-1.0.3
 - pbkdf-1.1.1.1
 - secp256k1-0.4.6
 - cryptohash-sha256-0.11.100.1
-
-
+- proto-lens-0.1.0.5
+- Concurrent-Cache-0.2.2.3
 
 flags: {}
 extra-package-dbs: []

@@ -8,7 +8,7 @@ module RBPCP.Types
 , BaseUrl(..)
 , Client(..)
 , Server(..)
-
+, BtcTxId(..)
 )
 where
 
@@ -27,18 +27,13 @@ import           Servant.API                (MimeRender(..), JSON)
 import           Servant.Client             (BaseUrl(..))
 import           Data.Time.Clock
 
--- Generated code
+-- Generated imports
 import Data.List (stripPrefix)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
 import           Data.Function ((&))
 
-{-
-
-mkPayRequestT :: UTCTime -> PayReqSpec -> P.PaymentRequest
-
--}
 
 type Vout  = Word32
 type Hours = Word
@@ -117,7 +112,7 @@ data PaymentResult = PaymentResult
     { paymentResult_channel_status    :: ChannelStatus    -- ^ Equal to \"open\" if the channel is still open, otherwise \"closed\". The channel is automatically closed when there is no value left to send. If a payment sends all remaining channel value to the server, the server will close the channel and set this field to \"closed\".
     , paymentResult_channel_valueLeft :: Word64           -- ^ Remaining channel value. This is the amount that the client/sender would receive if the channel was closed now.
     , paymentResult_value_received    :: Word64     -- ^ Value of the payment that was just received. This is the additional value assigned to the receiver/server with this payment.
-    , paymentResult_settlement_txid   :: Maybe TxHash     -- ^ If channel_status equals \"closed\": the transaction ID of the Bitcoin transaction which settles the channel; otherwise null.
+    , paymentResult_settlement_txid   :: Maybe BtcTxId     -- ^ If channel_status equals \"closed\": the transaction ID of the Bitcoin transaction which settles the channel; otherwise null.
     , paymentResult_application_data  :: Text           -- ^ Optional application data
     } deriving (Show, Eq, Generic, Bin.Serialize)
 
@@ -126,7 +121,6 @@ data FundingInfo = FundingInfo
     { fundingInfoServerPubkey               :: Server PubKey    -- ^ Server/value receiver public key. Hex-encoded, compressed Secp256k1 pubkey, 33 bytes.
     , fundingInfoDustLimit                  :: Word64  -- ^ (Satoshis) The server will not accept payments where the client change amount is less than this amount. This \"dust limit\" is necessary in order to avoid producing a settlement transaction that will not circulate in the Bitcoin P2P network because it contains an output of minuscule value. Consequently, the maximum amount, that can be sent over the payment channel, is the amount sent to the funding address minus this \"dust limit\".
     , fundingInfoFundingAddressCopy         :: Address    -- ^ Server derived channel funding address. The client will confirm that its own derived funding address matches this one, before paying to it.
-    , fundingInfoRedeem_scriptCopy          :: JsonHex Script     -- ^ Server derived channel redeem script. Defines sender, receiver and channel expiration date. Used to construct the input in the payment transaction. The client will also verify that this matches what it expects. Hex-encoded.
     , fundingInfoOpenPrice                  :: Word64 -- ^ Price (in satoshis) for opening a channel with the given {exp_time}. This amount is paid in the initial channel payment when creating a new channel. May be zero, in which case a payment of zero value is transferred, ensuring that the channel can be closed at any time.
     , fundingInfoFunding_tx_min_conf        :: BtcConf -- ^ Minimum confirmation count that the funding transaction must have before proceeding with opening a new channel.
     , fundingInfoSettlement_period_hours    :: Hours -- ^ The server reserves the right to close the payment channel this many hours before the specified expiration date. The server hasn't received any actual value until it publishes a payment transaction to the Bitcoin network, so it needs a window of time in which the client can no longer send payments over the channel, and yet the channel refund transaction hasn't become valid.
@@ -143,7 +137,7 @@ data Error = Error
 -- The Bitcoin transaction redeems the outpoint specified by &#39;funding_txid&#39; and &#39;funding_vout&#39; (a P2SH output governed by &#39;redeem_script&#39;), and pays &#39;change_value&#39; to &#39;change_address&#39;.
 data PaymentData = PaymentData
     { paymentDataRedeemScript   :: JsonHex Script       -- ^ The funds sent to the funding address are bound by this contract (Bitcoin script). The data is needed to construct the payment signature. Hex-encoded data.
-    , paymentDataFundingTxid    :: TxHash               -- ^ The transaction ID of the Bitcoin transaction paying to the channel funding address.
+    , paymentDataFundingTxid    :: BtcTxId               -- ^ The transaction ID of the Bitcoin transaction paying to the channel funding address.
     , paymentDataFundingVout    :: Vout                 -- ^ The output index/\"vout\" of the output (in the transaction) payingto the channel funding address.
     , paymentDataSignatureData  :: JsonHex Signature    -- ^ DER-encoded ECDSA signature (in hex). This is a SIGHASH_SINGLE|ANYONECANPAY signature over the the \"payment transaction\", which is a Bitcoin transaction that: redeems the outpoint specified by 'funding_txid' and 'funding_vout' using the redeem script defined in 'redeem_script', with an output which sends 'change_value' to 'change_address'.
     , paymentDataChangeValue    :: Word64               -- ^ The value sent back to the client in the payment transaction. The total amount transferred to the server is this amount subtracted from the value sent to the channel funding address.

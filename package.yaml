@@ -1,5 +1,5 @@
 name:         rbpcp-api
-version:      '0.1.0.0'
+version:      '0.2.0.0'
 synopsis:     RESTful Bitcoin Payment Channel Protocol Servant API description
 category:     Finance Network Bitcoin
 author:       Rune K. Svendsen
@@ -10,12 +10,10 @@ github:       runeksvendsen/haskell-rbpcp-api
 homepage:     http://paychandoc.runeks.me/
 
 description: ! 'RESTful Bitcoin Payment Channel Protocol (RBPCP) allows a client to send Bitcoin
-  payments to a server by establishing a Bitcoin payment channel with the server in a
+  payments to a server, by establishing a Bitcoin payment channel with the server in a
   standardized manner.
 
-  This library provides Servant API endpoints for RBPCP.
-
-  API spec: http://paychandoc.runeks.me/'
+  This library provides Servant API endpoints for RBPCP.'
 
 default-extensions:
 - OverloadedStrings
@@ -39,7 +37,7 @@ dependencies:
 - string-conversions        >=0.4     && <0.5
 - servant                   >=0.8     && <0.10
 - servant-client            >=0.8     && <0.10
-- time
+- time                      
 - http-api-data
 
 library:
@@ -51,3 +49,4 @@ library:
   - RBPCP.Callback
   - RBPCP.Callback.Types
   - RBPCP.Callback.Api
+  - RBPCP.Internal.Orphans

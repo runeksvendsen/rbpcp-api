@@ -21,7 +21,19 @@ import qualified Data.Serialize as Bin
 import qualified Web.HttpApiData as Web
 
 
+-- | Compressed Bitcoin public key
 type PubKey = PubKeyC
+
+-- | Bitcoin transaction ID
+newtype BtcTxId = BtcTxId TxHash
+    deriving (Eq, Show, Generic, Bin.Serialize, FromJSON, ToJSON)
+
+
+instance Web.FromHttpApiData BtcTxId where
+    parseUrlPiece = fmapL cs . hexDecode . cs
+instance Web.ToHttpApiData BtcTxId where
+    toUrlPiece = cs . hexEncode
+
 
 newtype JsonHex a = JsonHex { fromHex :: a } deriving (Eq, Show, Generic, Bin.Serialize)
 instance Bin.Serialize a => ToJSON (JsonHex a) where

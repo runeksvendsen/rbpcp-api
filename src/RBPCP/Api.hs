@@ -9,25 +9,27 @@ import           Servant.API
 
 type VER = "v2"
 
--- Example: /funding/028adc96575e3ee23a69eb17723911e77c5c06320e4354b1518bb635f32793c910/1474949961/info
+-- | Get information about how to fund a payment channel
 type FundInfo  = VER :> "funding"  :> Capture "client_pubkey" (Client PubKey) :> Capture "exp_time" BLT :> "info"
                                    :> Get '[JSON, PAYREQ] FundInfoResponse
 
--- Example: /channels/028adc96575e3ee23a69eb17723911e77c5c06320e4354b1518bb635f32793c910/1474949961/53ee3615ac0dd479ec1d3e144eb651f65764d3a5e400c04cf3c79425e8b22fb0/2
-type ChanOpen  = VER :> "channels" :> Capture "client_pubkey" (Client PubKey) :> Capture "exp_time"     BLT
-                                   :> Capture "funding_txid"  TxHash     :> Capture "funding_vout" Vout
+-- | Open a funded payment channel
+type ChanOpen  = VER :> "channels" :> Capture "funding_txid"  BtcTxId    :> Capture "funding_vout" Vout
+                                   :> QueryParam "secret"     Hash256
                                    :> ReqBody '[JSON] Payment            :> Verb 'POST 201 '[JSON] PaymentResult
 
-type ChanPay   = VER :> "channels" :> Capture "client_pubkey" (Client PubKey) :> Capture "exp_time" BLT
-                                   :> Capture "funding_txid"  TxHash     :> Capture "funding_vout" Vout
+-- | Send a payment over an open payment channel
+type ChanPay   = VER :> "channels" :> Capture "funding_txid"  BtcTxId    :> Capture "funding_vout" Vout
+                                   :> QueryParam "secret"     Hash256
                                    :> ReqBody '[JSON]         Payment    :> Put '[JSON] PaymentResult
 
-type ChanClose = VER :> "channels" :> Capture "client_pubkey" (Client PubKey) :> Capture "exp_time" BLT
-                                   :> Capture "funding_txid" TxHash      :> Capture "funding_vout" Vout     :> "close"
+-- | Close an open payment channel
+type ChanClose = VER :> "channels" :> Capture "funding_txid"  BtcTxId    :> Capture "funding_vout" Vout
+                                   :> QueryParam "secret"     Hash256    :> "close"
                                    :> ReqBody '[JSON] Payment            :> Put '[JSON] PaymentResult
 
 
--- | RESTful Bitcoin payment channel protocol
+-- | RESTful Bitcoin payment channel protocol (info, open, pay, close)
 type RBPCP =
        FundInfo
   :<|> ChanOpen
