@@ -25,7 +25,7 @@ import qualified Web.HttpApiData as Web
 type PubKey = PubKeyC
 
 -- | Bitcoin transaction ID
-newtype BtcTxId = BtcTxId TxHash
+newtype BtcTxId = BtcTxId { btcTxId :: TxHash }
     deriving (Eq, Show, Generic, Bin.Serialize, FromJSON, ToJSON)
 
 

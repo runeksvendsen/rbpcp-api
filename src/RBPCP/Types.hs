@@ -64,7 +64,6 @@ instance MimeRender JSON FundInfoResponse where
     mimeRender a FundInfoResponse{..} =
         mimeRender a firFundInfo
 
-
 data ChannelStatus = ChannelOpen | ChannelClosed deriving (Show, Eq)
 instance FromJSON ChannelStatus where
     parseJSON = withText "ChannelStatus" $
