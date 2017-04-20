@@ -11,7 +11,7 @@ type VER = "v2"
 
 -- | Get information about how to fund a payment channel
 type FundInfo  = VER :> "funding"  :> Capture "client_pubkey" (Client PubKey) :> Capture "exp_time" BLT :> "info"
-                                   :> Get '[JSON, PAYREQ] FundInfoResponse
+                                   :> Get '[JSON] FundingInfo -- '[JSON, PAYREQ]
 
 -- | Open a funded payment channel
 type ChanOpen  = VER :> "channels" :> Capture "funding_txid"  BtcTxId    :> Capture "funding_vout" Vout
