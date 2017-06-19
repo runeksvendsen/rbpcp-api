@@ -10,8 +10,8 @@ packages:
 - '.'
 ## Extra deps
 - location:
-    git: https://github.com/runeksvendsen/haskoin.git
-    commit: 9add83fd4aa8bc960a15a1d24e6e831981a9f8a4
+    git: https://github.com/haskoin/haskoin.git
+    commit: e11ff9b8375ea07bf72420401898f9d607476bb2
   extra-dep: true
   subdirs:
     - haskoin-core

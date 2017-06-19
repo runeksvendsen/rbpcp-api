@@ -9,6 +9,7 @@ module RBPCP.Types
 , Client(..)
 , Server(..)
 , BtcTxId(..)
+, PubKey
 )
 where
 
@@ -34,7 +35,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import           Data.Function ((&))
 
-
+type BLT = Word32     -- ^ Bitcoin lock-time
 type Vout  = Word32
 type Hours = Word
 type BtcConf = Word
@@ -43,7 +44,7 @@ data FundInfoResponse = FundInfoResponse
     { firFundInfo   :: FundingInfo
     , firUserMemo   :: T.Text       -- ^ Memo displayed to user
     , firNow        :: UTCTime      -- ^ Current time
-    , firPaymentURL :: BaseUrl
+    , firPaymentURL :: BaseUrl      -- ^ Paying Bitcoin transaction is POSTed to this URL
     -- ^ BIP70 @Payment@ POST URL. Will receive message (containing tx paying to the funding address)
     , firExpSecs    :: Word64
     }
@@ -108,23 +109,36 @@ instance Bin.Serialize Text where
 -- Generated code with some types modified:
 -- |
 data PaymentResult = PaymentResult
-    { paymentResult_channel_status    :: ChannelStatus    -- ^ Equal to \"open\" if the channel is still open, otherwise \"closed\". The channel is automatically closed when there is no value left to send. If a payment sends all remaining channel value to the server, the server will close the channel and set this field to \"closed\".
-    , paymentResult_channel_valueLeft :: Word64           -- ^ Remaining channel value. This is the amount that the client/sender would receive if the channel was closed now.
-    , paymentResult_value_received    :: Word64     -- ^ Value of the payment that was just received. This is the additional value assigned to the receiver/server with this payment.
-    , paymentResult_settlement_txid   :: Maybe BtcTxId     -- ^ If channel_status equals \"closed\": the transaction ID of the Bitcoin transaction which settles the channel; otherwise null.
-    , paymentResult_application_data  :: Text           -- ^ Optional application data
+    { paymentResultChannelStatus    :: ChannelStatus    -- ^ Equal to \"open\" if the channel is still open, otherwise \"closed\". The channel is automatically closed when there is no value left to send. If a payment sends all remaining channel value to the server, the server will close the channel and set this field to \"closed\".
+    , paymentResultChannelValueLeft :: Word64           -- ^ Remaining channel value. This is the amount that the client/sender would receive if the channel was closed now.
+    , paymentResultValueReceived    :: Word64     -- ^ Value of the payment that was just received. This is the additional value assigned to the receiver/server with this payment.
+    , paymentResultSettlementTxid   :: Maybe BtcTxId     -- ^ If channel_status equals \"closed\": the transaction ID of the Bitcoin transaction which settles the channel; otherwise null.
+    , paymentResultApplicationData  :: Text           -- ^ Optional application data
     } deriving (Show, Eq, Generic, Bin.Serialize)
+
+
+instance FromJSON PaymentResult where
+  parseJSON  = genericParseJSON  (removePrefixCamelUnderscore "paymentResult")
+instance ToJSON PaymentResult where
+  toJSON     = genericToJSON     (removePrefixCamelUnderscore "paymentResult")
+
 
 -- |
 data FundingInfo = FundingInfo
-    { fundingInfoServerPubkey               :: Server PubKey    -- ^ Server/value receiver public key. Hex-encoded, compressed Secp256k1 pubkey, 33 bytes.
-    , fundingInfoDustLimit                  :: Word64  -- ^ (Satoshis) The server will not accept payments where the client change amount is less than this amount. This \"dust limit\" is necessary in order to avoid producing a settlement transaction that will not circulate in the Bitcoin P2P network because it contains an output of minuscule value. Consequently, the maximum amount, that can be sent over the payment channel, is the amount sent to the funding address minus this \"dust limit\".
-    , fundingInfoFundingAddressCopy         :: Address    -- ^ Server derived channel funding address. The client will confirm that its own derived funding address matches this one, before paying to it.
-    , fundingInfoOpenPrice                  :: Word64 -- ^ Price (in satoshis) for opening a channel with the given {exp_time}. This amount is paid in the initial channel payment when creating a new channel. May be zero, in which case a payment of zero value is transferred, ensuring that the channel can be closed at any time.
-    , fundingInfoFunding_tx_min_conf        :: BtcConf -- ^ Minimum confirmation count that the funding transaction must have before proceeding with opening a new channel.
-    , fundingInfoSettlement_period_hours    :: Hours -- ^ The server reserves the right to close the payment channel this many hours before the specified expiration date. The server hasn't received any actual value until it publishes a payment transaction to the Bitcoin network, so it needs a window of time in which the client can no longer send payments over the channel, and yet the channel refund transaction hasn't become valid.
-    , fundingInfoMin_duration_hours         :: Hours -- ^ Minimum duration of newly opened channels
+    { fundingInfoServerPubkey            :: Server PubKey -- ^ Server/value receiver public key. Hex-encoded, compressed Secp256k1 pubkey, 33 bytes.
+    , fundingInfoDustLimit               :: Word64        -- ^ (Satoshis) The server will not accept payments where the client change amount is less than this amount. This \"dust limit\" is necessary in order to avoid producing a settlement transaction that will not circulate in the Bitcoin P2P network because it contains an output of minuscule value. Consequently, the maximum amount, that can be sent over the payment channel, is the amount sent to the funding address minus this \"dust limit\".
+    , fundingInfoFundingAddressCopy      :: Address       -- ^ Server derived channel funding address. The client will confirm that its own derived funding address matches this one, before paying to it.
+    , fundingInfoOpenPrice               :: Word64        -- ^ Price (in satoshis) for opening a channel with the given {exp_time}. This amount is paid in the initial channel payment when creating a new channel. May be zero, in which case a payment of zero value is transferred, ensuring that the channel can be closed at any time.
+    , fundingInfoFundingTxMinConf        :: BtcConf       -- ^ Minimum confirmation count that the funding transaction must have before proceeding with opening a new channel.
+    , fundingInfoSettlementPeriodHours   :: Hours         -- ^ The server reserves the right to close the payment channel this many hours before the specified expiration date. The server hasn't received any actual value until it publishes a payment transaction to the Bitcoin network, so it needs a window of time in which the client can no longer send payments over the channel, and yet the channel refund transaction hasn't become valid.
+    , fundingInfoMinDurationHours        :: Hours         -- ^ Minimum duration of newly opened channels
     } deriving (Show, Eq, Generic, Bin.Serialize)
+
+
+instance FromJSON FundingInfo where
+  parseJSON  = genericParseJSON  (removePrefixCamelUnderscore "fundingInfo")
+instance ToJSON FundingInfo where
+  toJSON     = genericToJSON     (removePrefixCamelUnderscore "fundingInfo")
 
 -- | Error response type
 data Error = Error
@@ -145,9 +159,9 @@ data PaymentData = PaymentData
     } deriving (Show, Eq, Generic, Bin.Serialize)
 
 instance FromJSON PaymentData where
-  parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "paymentData")
+  parseJSON  = genericParseJSON  (removePrefixCamelUnderscore "paymentData")
 instance ToJSON PaymentData where
-  toJSON     = genericToJSON     (removeFieldLabelPrefix False "paymentData")
+  toJSON     = genericToJSON     (removePrefixCamelUnderscore "paymentData")
 
 
 -- | A wrapper that contains both payment data and application data
@@ -157,32 +171,20 @@ data Payment = Payment
     } deriving (Show, Eq, Generic, Bin.Serialize)
 
 instance FromJSON Payment where
-  parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "payment")
+  parseJSON  = genericParseJSON  (removePrefixCamelUnderscore "payment")
 instance ToJSON Payment where
-  toJSON     = genericToJSON     (removeFieldLabelPrefix False "payment")
+  toJSON     = genericToJSON     (removePrefixCamelUnderscore "payment")
 
 instance FromJSON Error where
-  parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "error")
+  parseJSON  = genericParseJSON  (removePrefixCamelUnderscore "error")
 instance ToJSON Error where
-  toJSON     = genericToJSON     (removeFieldLabelPrefix False "error")
+  toJSON     = genericToJSON     (removePrefixCamelUnderscore "error")
 
-instance FromJSON FundingInfo where
-  parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "fundingInfo")
-instance ToJSON FundingInfo where
-  toJSON     = genericToJSON     (removeFieldLabelPrefix False "fundingInfo")
-
-instance FromJSON PaymentResult where
-  parseJSON  = genericParseJSON  (removeFieldLabelPrefix True "paymentResult_")
-instance ToJSON PaymentResult where
-  toJSON     = genericToJSON     (removeFieldLabelPrefix False "paymentResult_")
-
-removeFieldLabelPrefix :: Bool -> String -> Options
-removeFieldLabelPrefix forParsing prefix =
+removePrefixCamelUnderscore :: String -> Options
+removePrefixCamelUnderscore prefix =
   defaultOptions
-    { fieldLabelModifier = camelTo2 '_' . fromMaybe (error ("did not find prefix " ++ prefix)) . stripPrefix prefix . replaceSpecialChars
+    { fieldLabelModifier =
+          camelTo2 '_'
+        . fromMaybe (error ("did not find prefix " ++ prefix))
+        . stripPrefix prefix
     }
-  where
-    replaceSpecialChars field = foldl (&) field (map mkCharReplacement specialChars)
-    specialChars = [("@", "'At"), ("!", "'Exclamation"), ("<=", "'Less_Than_Or_Equal_To"), ("#", "'Hash"), ("$", "'Dollar"), ("%", "'Percent"), ("&", "'Ampersand"), ("*", "'Star"), ("+", "'Plus"), ("-", "'Dash"), (".", "'Period"), (":", "'Colon"), ("|", "'Pipe"), ("<", "'LessThan"), ("!=", "'Not_Equal"), ("=", "'Equal"), ("^", "'Caret"), (">", "'GreaterThan"), ("_", "'Underscore"), (">=", "'Greater_Than_Or_Equal_To")]
-    mkCharReplacement (replaceStr, searchStr) = T.unpack . replacer (T.pack searchStr) (T.pack replaceStr) . T.pack
-    replacer = if forParsing then flip T.replace else T.replace

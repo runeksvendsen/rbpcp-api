@@ -26,8 +26,12 @@ type PubKey = PubKeyC
 
 -- | Bitcoin transaction ID
 newtype BtcTxId = BtcTxId { btcTxId :: TxHash }
-    deriving (Eq, Show, Generic, Bin.Serialize, FromJSON, ToJSON)
+    deriving (Eq, Generic, Bin.Serialize, FromJSON, ToJSON)
 
+instance Show BtcTxId where
+    show = cs . castJsonString . toJSON . btcTxId
+        where castJsonString (String s) = s
+              castJsonString _ = error "BUG: JSON TxHash is not String"
 
 instance Web.FromHttpApiData BtcTxId where
     parseUrlPiece = fmapL cs . hexDecode . cs

@@ -37,5 +37,3 @@ type RBPCP =
   :<|> ChanClose
 
 
--- Short-hands
-type BLT = Word32
