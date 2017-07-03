@@ -49,4 +49,3 @@ library:
   - RBPCP.Callback
   - RBPCP.Callback.Types
   - RBPCP.Callback.Api
-  - RBPCP.Internal.Orphans

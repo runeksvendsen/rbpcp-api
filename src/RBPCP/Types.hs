@@ -15,7 +15,6 @@ where
 
 import           RBPCP.Internal.Types
 import           RBPCP.Internal.Util
-import           RBPCP.Internal.Orphans     ()
 import           PayProto                   (PaymentRequest, PAYREQ, PayReqSpec(..), mkPayRequestT)
 import           Data.Aeson
 import           Data.Aeson.Types
@@ -26,6 +25,7 @@ import qualified Data.ByteString            as BS
 import qualified Data.ByteString.Lazy       as BL
 import           Servant.API                (MimeRender(..), JSON)
 import           Servant.Client             (BaseUrl(..))
+import qualified Web.HttpApiData as Web
 import           Data.Time.Clock
 
 -- Generated imports
@@ -39,6 +39,31 @@ type BLT = Word32     -- ^ Bitcoin lock-time
 type Vout  = Word32
 type Hours = Word
 type BtcConf = Word
+
+
+newtype SharedSecret = SharedSecret Hash256
+    deriving (Eq, Show, Generic, Bin.Serialize)
+
+instance ToJSON SharedSecret where
+    toJSON = String . cs . hexEncode
+
+instance FromJSON SharedSecret where
+    parseJSON = withText "SharedSecret" (either fail return . hexDecode . cs)
+
+instance Web.FromHttpApiData SharedSecret where
+    parseUrlPiece = fmapL cs . eitherDecode . cs
+instance Web.ToHttpApiData SharedSecret where
+    toUrlPiece = cs . encode
+
+newtype BtcScript = BtcScript Script
+    deriving (Eq, Show, Generic, Bin.Serialize)
+
+instance ToJSON BtcScript where
+    toJSON = String . cs . hexEncode
+
+instance FromJSON BtcScript where
+    parseJSON = withText "BtcScript" (either fail return . hexDecode . cs)
+
 
 data FundInfoResponse = FundInfoResponse
     { firFundInfo   :: FundingInfo
@@ -149,8 +174,8 @@ data Error = Error
 -- | A payment comprises a signature over a Bitcoin transaction with a decremented client change value.
 -- The Bitcoin transaction redeems the outpoint specified by &#39;funding_txid&#39; and &#39;funding_vout&#39; (a P2SH output governed by &#39;redeem_script&#39;), and pays &#39;change_value&#39; to &#39;change_address&#39;.
 data PaymentData = PaymentData
-    { paymentDataRedeemScript   :: JsonHex Script       -- ^ The funds sent to the funding address are bound by this contract (Bitcoin script). The data is needed to construct the payment signature. Hex-encoded data.
-    , paymentDataFundingTxid    :: BtcTxId               -- ^ The transaction ID of the Bitcoin transaction paying to the channel funding address.
+    { paymentDataRedeemScript   :: JsonHex BtcScript    -- ^ The funds sent to the funding address are bound by this contract (Bitcoin script). The data is needed to construct the payment signature. Hex-encoded data.
+    , paymentDataFundingTxid    :: BtcTxId              -- ^ The transaction ID of the Bitcoin transaction paying to the channel funding address.
     , paymentDataFundingVout    :: Vout                 -- ^ The output index/\"vout\" of the output (in the transaction) payingto the channel funding address.
     , paymentDataSignatureData  :: JsonHex Signature    -- ^ DER-encoded ECDSA signature (in hex). This is a SIGHASH_SINGLE|ANYONECANPAY signature over the the \"payment transaction\", which is a Bitcoin transaction that: redeems the outpoint specified by 'funding_txid' and 'funding_vout' using the redeem script defined in 'redeem_script', with an output which sends 'change_value' to 'change_address'.
     , paymentDataChangeValue    :: Word64               -- ^ The value sent back to the client in the payment transaction. The total amount transferred to the server is this amount subtracted from the value sent to the channel funding address.

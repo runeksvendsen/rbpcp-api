@@ -15,17 +15,17 @@ type FundInfo  = VER :> "funding"  :> Capture "client_pubkey" (Client PubKey) :>
 
 -- | Open a funded payment channel
 type ChanOpen  = VER :> "channels" :> Capture "funding_txid"  BtcTxId    :> Capture "funding_vout" Vout
-                                   :> QueryParam "secret"     Hash256
+                                   :> QueryParam "secret"     SharedSecret
                                    :> ReqBody '[JSON] Payment            :> Verb 'POST 201 '[JSON] PaymentResult
 
 -- | Send a payment over an open payment channel
 type ChanPay   = VER :> "channels" :> Capture "funding_txid"  BtcTxId    :> Capture "funding_vout" Vout
-                                   :> QueryParam "secret"     Hash256
+                                   :> QueryParam "secret"     SharedSecret
                                    :> ReqBody '[JSON]         Payment    :> Put '[JSON] PaymentResult
 
 -- | Close an open payment channel
 type ChanClose = VER :> "channels" :> Capture "funding_txid"  BtcTxId    :> Capture "funding_vout" Vout
-                                   :> QueryParam "secret"     Hash256    :> "close"
+                                   :> QueryParam "secret"     SharedSecret    :> "close"
                                    :> ReqBody '[JSON] Payment            :> Put '[JSON] PaymentResult
 
 
