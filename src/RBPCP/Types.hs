@@ -9,6 +9,8 @@ module RBPCP.Types
 , Client(..)
 , Server(..)
 , BtcTxId(..)
+, SharedSecret(..)
+, BtcScript(..)
 , PubKey
 )
 where
@@ -41,7 +43,7 @@ type Hours = Word
 type BtcConf = Word
 
 
-newtype SharedSecret = SharedSecret Hash256
+newtype SharedSecret = SharedSecret { ssGetHash :: Hash256 }
     deriving (Eq, Show, Generic, Bin.Serialize)
 
 instance ToJSON SharedSecret where
@@ -55,7 +57,7 @@ instance Web.FromHttpApiData SharedSecret where
 instance Web.ToHttpApiData SharedSecret where
     toUrlPiece = cs . encode
 
-newtype BtcScript = BtcScript Script
+newtype BtcScript = BtcScript { bsGetScript :: Script }
     deriving (Eq, Show, Generic, Bin.Serialize)
 
 instance ToJSON BtcScript where
