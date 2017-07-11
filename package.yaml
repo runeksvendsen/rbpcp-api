@@ -39,6 +39,7 @@ dependencies:
 - servant-client            >=0.8     && <0.10
 - time                      
 - http-api-data
+- deepseq
 
 library:
   source-dirs: src

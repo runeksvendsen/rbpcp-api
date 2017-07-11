@@ -5,6 +5,7 @@ module RBPCP.Internal.Types
   , module X
   , ByteString
   , Generic
+  , NFData
 )
 where
 
@@ -19,7 +20,7 @@ import           GHC.Generics (Generic)
 import Data.Aeson
 import qualified Data.Serialize as Bin
 import qualified Web.HttpApiData as Web
-
+import           Control.DeepSeq                         (NFData)
 
 -- | Compressed Bitcoin public key
 type PubKey = PubKeyC

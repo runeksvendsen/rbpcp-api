@@ -17,25 +17,23 @@ where
 
 import           RBPCP.Internal.Types
 import           RBPCP.Internal.Util
-import           PayProto                   (PaymentRequest, PAYREQ, PayReqSpec(..), mkPayRequestT)
+import           PayProto                   (PAYREQ, PayReqSpec(..), mkPayRequestT)
 import           Data.Aeson
 import           Data.Aeson.Types
 import           Data.Text.Encoding         (encodeUtf8, decodeUtf8)
-import           Data.Word                  (Word8, Word32, Word64)
+import           Data.Word                  (Word32, Word64)
 import qualified Data.Serialize             as Bin
-import qualified Data.ByteString            as BS
 import qualified Data.ByteString.Lazy       as BL
 import           Servant.API                (MimeRender(..), JSON)
 import           Servant.Client             (BaseUrl(..))
 import qualified Web.HttpApiData as Web
 import           Data.Time.Clock
-
 -- Generated imports
 import Data.List (stripPrefix)
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
-import           Data.Function ((&))
+
 
 type BLT = Word32     -- ^ Bitcoin lock-time
 type Vout  = Word32
@@ -43,8 +41,8 @@ type Hours = Word
 type BtcConf = Word
 
 
-newtype SharedSecret = SharedSecret { ssGetHash :: Hash256 }
-    deriving (Eq, Show, Generic, Bin.Serialize)
+newtype SharedSecret = SharedSecret { ssHash :: Hash256 }
+    deriving (Eq, Show, Generic, Bin.Serialize, NFData)
 
 instance ToJSON SharedSecret where
     toJSON = String . cs . hexEncode
@@ -56,6 +54,7 @@ instance Web.FromHttpApiData SharedSecret where
     parseUrlPiece = fmapL cs . eitherDecode . cs
 instance Web.ToHttpApiData SharedSecret where
     toUrlPiece = cs . encode
+
 
 newtype BtcScript = BtcScript { bsGetScript :: Script }
     deriving (Eq, Show, Generic, Bin.Serialize)
